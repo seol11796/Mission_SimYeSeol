@@ -54,15 +54,17 @@ public class LikeablePersonService {
     public RsData<LikeablePerson> delete(LikeablePerson likeablePerson){
         this.likeablePersonRepository.delete(likeablePerson);
 
+
+
         return RsData.of("S-1","해당 유저가 호감상대 목록에서 삭제되었습니다.");
     }
 
-    public LikeablePerson getLikeablePrn(Integer id){
+    public LikeablePerson getLikeablePrn(Long id){
         Optional<LikeablePerson> likeablePerson = this.likeablePersonRepository.findById(id);
         if (likeablePerson.isPresent()){
             return likeablePerson.get();
         } else {
-        throw new DataNotFoundException("answer not found");
+        throw null;
         }
     }
 

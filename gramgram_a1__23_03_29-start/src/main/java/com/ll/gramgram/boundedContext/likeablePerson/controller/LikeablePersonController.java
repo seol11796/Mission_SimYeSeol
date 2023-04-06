@@ -51,16 +51,26 @@ public class LikeablePersonController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable("id") Integer id){
+    public String delete(@PathVariable("id") Long id){
         LikeablePerson likeablePerson = this.likeablePersonService.getLikeablePrn(id);
 
+        if(likeablePerson == null){
+            return rq.redirectWithMsg("/likeablePerson/list","삭제에 실패했습니다.");
+
+        }
+
         RsData<LikeablePerson> deleteRsData = likeablePersonService.delete(likeablePerson);
+
+        // 인스타 id가 본인일 경우에만 삭제 요청을 할 수 있도록 검증
+        if(rq.getMember().getInstaMember().getId() != likeablePerson.getFromInstaMember().getId()){
+            return rq.historyBack("권한이 없습니다.");
+        }
 
         if(deleteRsData.isFail()){
             return rq.historyBack(deleteRsData);
         }
 
-        return rq.redirectWithMsg("/likeablePerson/list", deleteRsData);
+        return rq.redirectWithMsg("/likeablePerson/list",deleteRsData);
     }
 
 
@@ -76,4 +86,6 @@ public class LikeablePersonController {
 
         return "usr/likeablePerson/list";
     }
+
+
 }
