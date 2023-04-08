@@ -12,10 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -50,7 +47,7 @@ public class LikeablePersonController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public String delete(@PathVariable("id") Long id){
         LikeablePerson likeablePerson = this.likeablePersonService.getLikeablePrn(id);
 
@@ -80,7 +77,9 @@ public class LikeablePersonController {
 
         // 인스타인증을 했는지 체크
         if (instaMember != null) {
-            List<LikeablePerson> likeablePeople = likeablePersonService.findByFromInstaMemberId(instaMember.getId());
+            //List<LikeablePerson> likeablePeople = likeablePersonService.findByFromInstaMemberId(instaMember.getId());
+            List<LikeablePerson> likeablePeople = instaMember.getFromLikeablePeople();
+
             model.addAttribute("likeablePeople", likeablePeople);
         }
 
