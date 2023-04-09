@@ -24,7 +24,7 @@ public class LikeablePersonService {
 
     @Transactional
     public RsData<LikeablePerson> like(Member member, String username, int attractiveTypeCode) {
-        if ( member.hasConnectedInstaMember() == false ) {
+        if (member.hasConnectedInstaMember() == false) {
             return RsData.of("F-2", "먼저 본인의 인스타그램 아이디를 입력해야 합니다.");
         }
 
@@ -55,29 +55,33 @@ public class LikeablePersonService {
         return RsData.of("S-1", "입력하신 인스타유저(%s)를 호감상대로 등록되었습니다.".formatted(username), likeablePerson);
     }
 
-
-    // 해당 유저에 해당하는 LikeablePerson을 삭제해야함
-    @Transactional
-    public RsData<LikeablePerson> delete(LikeablePerson likeablePerson){
-        this.likeablePersonRepository.delete(likeablePerson);
-
-
-
-        return RsData.of("S-1","해당 유저가 호감상대 목록에서 삭제되었습니다.");
-    }
-
-    public LikeablePerson getLikeablePrn(Long id){
-        Optional<LikeablePerson> likeablePerson = this.likeablePersonRepository.findById(id);
-        if (likeablePerson.isPresent()){
-            return likeablePerson.get();
-        } else {
-        throw null;
-        }
-    }
-
-
-
     public List<LikeablePerson> findByFromInstaMemberId(Long fromInstaMemberId) {
         return likeablePersonRepository.findByFromInstaMemberId(fromInstaMemberId);
+    }
+
+    public Optional<LikeablePerson> findById(Long id) {
+        return likeablePersonRepository.findById(id);
+    }
+
+    @Transactional
+    public RsData delete(LikeablePerson likeablePerson) {
+        likeablePersonRepository.delete(likeablePerson);
+
+        String likeCanceledUsername = likeablePerson.getToInstaMember().getUsername();
+        return RsData.of("S-1", "%s님에 대한 호감을 취소하였습니다.".formatted(likeCanceledUsername));
+    }
+
+    public RsData canActorDelete(Member actor, LikeablePerson likeablePerson) {
+        if (likeablePerson == null) return RsData.of("F-1", "이미 삭제되었습니다.");
+
+        // 수행자의 인스타계정 번호
+        long actorInstaMemberId = actor.getInstaMember().getId();
+        // 삭제 대상의 작성자(호감표시한 사람)의 인스타계정 번호
+        long fromInstaMemberId = likeablePerson.getFromInstaMember().getId();
+
+        if (actorInstaMemberId != fromInstaMemberId)
+            return RsData.of("F-2", "권한이 없습니다.");
+
+        return RsData.of("S-1", "삭제가능합니다.");
     }
 }
