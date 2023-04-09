@@ -23,6 +23,7 @@ public class LikeablePersonController {
     private final Rq rq;
     private final LikeablePersonService likeablePersonService;
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/add")
     public String showAdd() {
         return "usr/likeablePerson/add";
@@ -35,6 +36,7 @@ public class LikeablePersonController {
         private final int attractiveTypeCode;
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/add")
     public String add(@Valid AddForm addForm) {
         RsData<LikeablePerson> createRsData = likeablePersonService.like(rq.getMember(), addForm.getUsername(), addForm.getAttractiveTypeCode());
@@ -46,45 +48,35 @@ public class LikeablePersonController {
         return rq.redirectWithMsg("/likeablePerson/list", createRsData);
     }
 
+
     @PreAuthorize("isAuthenticated()")
-    @DeleteMapping("/delete/{id}")
-    public String delete(@PathVariable("id") Long id){
-        LikeablePerson likeablePerson = this.likeablePersonService.getLikeablePrn(id);
-
-        if(likeablePerson == null){
-            return rq.redirectWithMsg("/likeablePerson/list","삭제에 실패했습니다.");
-
-        }
-
-        RsData<LikeablePerson> deleteRsData = likeablePersonService.delete(likeablePerson);
-
-        // 인스타 id가 본인일 경우에만 삭제 요청을 할 수 있도록 검증
-        if(rq.getMember().getInstaMember().getId() != likeablePerson.getFromInstaMember().getId()){
-            return rq.historyBack("권한이 없습니다.");
-        }
-
-        if(deleteRsData.isFail()){
-            return rq.historyBack(deleteRsData);
-        }
-
-        return rq.redirectWithMsg("/likeablePerson/list",deleteRsData);
-    }
-
-
     @GetMapping("/list")
     public String showList(Model model) {
         InstaMember instaMember = rq.getMember().getInstaMember();
 
         // 인스타인증을 했는지 체크
         if (instaMember != null) {
-            //List<LikeablePerson> likeablePeople = likeablePersonService.findByFromInstaMemberId(instaMember.getId());
+            // 해당 인스타회원이 좋아하는 사람들 목록
             List<LikeablePerson> likeablePeople = instaMember.getFromLikeablePeople();
-
             model.addAttribute("likeablePeople", likeablePeople);
         }
 
         return "usr/likeablePerson/list";
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable Long id) {
+        LikeablePerson likeablePerson = likeablePersonService.findById(id).orElse(null);
 
+        RsData canActorDeleteRsData = likeablePersonService.canActorDelete(rq.getMember(), likeablePerson);
+
+        if (canActorDeleteRsData.isFail()) return rq.historyBack(canActorDeleteRsData);
+
+        RsData deleteRsData = likeablePersonService.delete(likeablePerson);
+
+        if (deleteRsData.isFail()) return rq.historyBack(deleteRsData);
+
+        return rq.redirectWithMsg("/likeablePerson/list", deleteRsData);
+    }
 }
