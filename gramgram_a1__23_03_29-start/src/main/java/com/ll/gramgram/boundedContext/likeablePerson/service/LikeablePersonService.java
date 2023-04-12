@@ -1,26 +1,34 @@
 package com.ll.gramgram.boundedContext.likeablePerson.service;
 
 import com.ll.gramgram.DataNotFoundException;
+import com.ll.gramgram.base.config.AppConfig;
 import com.ll.gramgram.base.rsData.RsData;
 import com.ll.gramgram.boundedContext.instaMember.entity.InstaMember;
+import com.ll.gramgram.boundedContext.instaMember.repository.InstaMemberRepository;
 import com.ll.gramgram.boundedContext.instaMember.service.InstaMemberService;
 import com.ll.gramgram.boundedContext.likeablePerson.entity.LikeablePerson;
 import com.ll.gramgram.boundedContext.likeablePerson.repository.LikeablePersonRepository;
 import com.ll.gramgram.boundedContext.member.entity.Member;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class LikeablePersonService {
     private final LikeablePersonRepository likeablePersonRepository;
     private final InstaMemberService instaMemberService;
+    private final InstaMemberRepository instaMemberRepository;
+
+    InstaMember target;
 
     @Transactional
     public RsData<LikeablePerson> like(Member member, String username, int attractiveTypeCode) {
@@ -31,6 +39,40 @@ public class LikeablePersonService {
         if (member.getInstaMember().getUsername().equals(username)) {
             return RsData.of("F-1", "본인을 호감상대로 등록할 수 없습니다.");
         }
+
+        // TODO - 한명의 인스타 회원이 다른 인스타 회원에게 중복으로 호감표시를 할 수 없다.
+        // 해당 member가 좋아요 누른 사람들
+       List<LikeablePerson> fromLikeablePeople = member.getInstaMember().getFromLikeablePeople();
+
+        // TODO - 11명 이상의 호감 상대를 등록 불가
+        if(fromLikeablePeople.size() == AppConfig.getMaxSize()){
+            return RsData.of("F-4","11명 이상의 호감 상대를 등록할 수 없습니다.");
+        }
+
+        log.info("toLikeablePeople: "+fromLikeablePeople.size());
+
+        // 해당 username에 해당되는 인스타맴버
+        Optional<InstaMember> targetPerson = instaMemberRepository.findByUsername(username);
+        if(targetPerson.isPresent()){
+            target = targetPerson.get();
+        }
+
+        for(LikeablePerson person: fromLikeablePeople){
+            if(Objects.equals(person.getToInstaMember().getUsername(), target.getUsername()))
+            {
+
+                if(attractiveTypeCode == person.getAttractiveTypeCode()){
+                    return RsData.of("F-3","같은 유저에 대해 같은 사유로 호감표시가 불가합니다.");
+                }
+
+               // TODO - 다른 사유로 호감 표시를 했으며 업데이트
+                person.setAttractiveTypeCode(attractiveTypeCode);
+                return RsData.of("S-2","호감 표시 사유 변경");
+
+            }
+
+      }
+
 
         InstaMember fromInstaMember = member.getInstaMember();
         InstaMember toInstaMember = instaMemberService.findByUsernameOrCreate(username).getData();

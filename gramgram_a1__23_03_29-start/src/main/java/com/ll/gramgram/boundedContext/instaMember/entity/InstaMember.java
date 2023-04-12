@@ -52,11 +52,15 @@ public class InstaMember {
 
     public void addFromLikeablePerson(LikeablePerson likeablePerson) {
         // 인덱스가 0인것은 앞에다가 넣는다는 뜻 .역순 정렬이라 최신것이 앞에 들어가도록
+
         fromLikeablePeople.add(0, likeablePerson);
     }
 
     public void addToLikeablePerson(LikeablePerson likeablePerson) {
+        //
+
         toLikeablePeople.add(0, likeablePerson);
+
     }
 
 }

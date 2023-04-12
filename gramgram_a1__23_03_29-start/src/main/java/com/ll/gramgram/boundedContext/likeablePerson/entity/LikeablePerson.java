@@ -19,11 +19,13 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Entity
 @Getter
 public class LikeablePerson {
+
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
     @CreatedDate
     private LocalDateTime createDate;
+
     @LastModifiedDate
     private LocalDateTime modifyDate;
 
@@ -37,6 +39,7 @@ public class LikeablePerson {
     private InstaMember toInstaMember; // 호감을 받은 사람(인스타 멤버)
     private String toInstaMemberUsername; // 혹시 몰라서 기록
 
+    @Setter
     private int attractiveTypeCode; // 매력포인트(1=외모, 2=성격, 3=능력)
 
     public String getAttractiveTypeDisplayName() {

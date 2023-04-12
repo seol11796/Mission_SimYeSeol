@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/likeablePerson")
@@ -41,8 +42,18 @@ public class LikeablePersonController {
     public String add(@Valid AddForm addForm) {
         RsData<LikeablePerson> createRsData = likeablePersonService.like(rq.getMember(), addForm.getUsername(), addForm.getAttractiveTypeCode());
 
+        if(createRsData.getResultCode() == "F-3"){
+            return rq.historyBack("같은 유저에 대한 중복 선호 표시가 불가능합니다. ");
+        }
+
+        if(createRsData.getResultCode() == "F-4"){
+            return rq.historyBack("10명 까지만 호감 표시가 가능합니다.");
+        }
+
+
         if (createRsData.isFail()) {
             return rq.historyBack(createRsData);
+
         }
 
         return rq.redirectWithMsg("/likeablePerson/list", createRsData);
