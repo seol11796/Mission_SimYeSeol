@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/likeablePerson")
@@ -22,6 +23,7 @@ import java.util.List;
 public class LikeablePersonController {
     private final Rq rq;
     private final LikeablePersonService likeablePersonService;
+
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/add")
@@ -39,13 +41,23 @@ public class LikeablePersonController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/add")
     public String add(@Valid AddForm addForm) {
-        RsData<LikeablePerson> createRsData = likeablePersonService.like(rq.getMember(), addForm.getUsername(), addForm.getAttractiveTypeCode());
+        RsData canLikeRsData = likeablePersonService.canLike(rq.getMember(), addForm.getUsername(), addForm.getAttractiveTypeCode());
 
-        if (createRsData.isFail()) {
-            return rq.historyBack(createRsData);
+        if (canLikeRsData.isFail()) return rq.historyBack(canLikeRsData);
+
+        RsData rsData;
+
+        if (canLikeRsData.getResultCode().equals("S-2")) {
+            rsData = likeablePersonService.modifyAttractive(rq.getMember(), addForm.getUsername(), addForm.getAttractiveTypeCode());
+        } else {
+            rsData = likeablePersonService.like(rq.getMember(), addForm.getUsername(), addForm.getAttractiveTypeCode());
         }
 
-        return rq.redirectWithMsg("/likeablePerson/list", createRsData);
+        if (rsData.isFail()) {
+            return rq.historyBack(rsData);
+        }
+
+        return rq.redirectWithMsg("/likeablePerson/list", rsData);
     }
 
 
@@ -69,7 +81,7 @@ public class LikeablePersonController {
     public String delete(@PathVariable Long id) {
         LikeablePerson likeablePerson = likeablePersonService.findById(id).orElse(null);
 
-        RsData canActorDeleteRsData = likeablePersonService.canActorDelete(rq.getMember(), likeablePerson);
+        RsData canActorDeleteRsData = likeablePersonService.canDelete(rq.getMember(), likeablePerson);
 
         if (canActorDeleteRsData.isFail()) return rq.historyBack(canActorDeleteRsData);
 

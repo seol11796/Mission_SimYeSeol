@@ -42,3 +42,8 @@ logging:
     com.ll: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE
+
+
+custom:
+  likeablePerson:
+    limit: 10
