@@ -24,6 +24,7 @@ public class LikeablePersonController {
     private final Rq rq;
     private final LikeablePersonService likeablePersonService;
 
+
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/add")
     public String showAdd() {
@@ -40,23 +41,23 @@ public class LikeablePersonController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/add")
     public String add(@Valid AddForm addForm) {
-        RsData<LikeablePerson> createRsData = likeablePersonService.like(rq.getMember(), addForm.getUsername(), addForm.getAttractiveTypeCode());
+        RsData canLikeRsData = likeablePersonService.canLike(rq.getMember(), addForm.getUsername(), addForm.getAttractiveTypeCode());
 
-        if(createRsData.getResultCode() == "F-3"){
-            return rq.historyBack("같은 유저에 대한 중복 선호 표시가 불가능합니다. ");
+        if (canLikeRsData.isFail()) return rq.historyBack(canLikeRsData);
+
+        RsData rsData;
+
+        if (canLikeRsData.getResultCode().equals("S-2")) {
+            rsData = likeablePersonService.modifyAttractive(rq.getMember(), addForm.getUsername(), addForm.getAttractiveTypeCode());
+        } else {
+            rsData = likeablePersonService.like(rq.getMember(), addForm.getUsername(), addForm.getAttractiveTypeCode());
         }
 
-        if(createRsData.getResultCode() == "F-4"){
-            return rq.historyBack("10명 까지만 호감 표시가 가능합니다.");
+        if (rsData.isFail()) {
+            return rq.historyBack(rsData);
         }
 
-
-        if (createRsData.isFail()) {
-            return rq.historyBack(createRsData);
-
-        }
-
-        return rq.redirectWithMsg("/likeablePerson/list", createRsData);
+        return rq.redirectWithMsg("/likeablePerson/list", rsData);
     }
 
 
@@ -80,7 +81,7 @@ public class LikeablePersonController {
     public String delete(@PathVariable Long id) {
         LikeablePerson likeablePerson = likeablePersonService.findById(id).orElse(null);
 
-        RsData canActorDeleteRsData = likeablePersonService.canActorDelete(rq.getMember(), likeablePerson);
+        RsData canActorDeleteRsData = likeablePersonService.canDelete(rq.getMember(), likeablePerson);
 
         if (canActorDeleteRsData.isFail()) return rq.historyBack(canActorDeleteRsData);
 
