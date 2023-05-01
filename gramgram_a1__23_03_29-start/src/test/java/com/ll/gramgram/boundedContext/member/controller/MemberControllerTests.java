@@ -26,6 +26,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
+
 @SpringBootTest // 스프링부트 관련 컴포넌트 테스트할 때 붙여야 함, Ioc 컨테이너 작동시킴
 @AutoConfigureMockMvc // http 요청, 응답 테스트
 @Transactional // 실제로 테스트에서 발생한 DB 작업이 영구적으로 적용되지 않도록, test + 트랜잭션 => 자동롤백
@@ -41,7 +43,7 @@ public class MemberControllerTests {
     void t001() throws Exception {
         // WHEN
         ResultActions resultActions = mvc
-                .perform(get("/member/join"))
+                .perform(get("/usr/member/join"))
                 .andDo(print()); // 크게 의미 없고, 그냥 확인용
 
         // THEN
@@ -56,7 +58,7 @@ public class MemberControllerTests {
                         <input type="password" name="password"
                         """.stripIndent().trim())))
                 .andExpect(content().string(containsString("""
-                        <input type="submit" value="회원가입"
+                        id="btn-join-1"
                         """.stripIndent().trim())));
     }
 
@@ -66,7 +68,7 @@ public class MemberControllerTests {
     void t002() throws Exception {
         // WHEN
         ResultActions resultActions = mvc
-                .perform(post("/member/join")
+                .perform(post("/usr/member/join")
                         .with(csrf()) // CSRF 키 생성
                         .param("username", "user10")
                         .param("password", "1234")
@@ -78,7 +80,7 @@ public class MemberControllerTests {
                 .andExpect(handler().handlerType(MemberController.class))
                 .andExpect(handler().methodName("join"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("/member/login?msg=**"));
+                .andExpect(redirectedUrlPattern("/usr/member/login?msg=**"));
 
         Member member = memberService.findByUsername("user10").orElse(null);
 
@@ -90,7 +92,7 @@ public class MemberControllerTests {
     void t003() throws Exception {
         // WHEN
         ResultActions resultActions = mvc
-                .perform(post("/member/join")
+                .perform(post("/usr/member/join")
                         .with(csrf()) // CSRF 키 생성
                         .param("username", "user10")
                 )
@@ -104,7 +106,7 @@ public class MemberControllerTests {
 
         // WHEN
         resultActions = mvc
-                .perform(post("/member/join")
+                .perform(post("/usr/member/join")
                         .with(csrf()) // CSRF 키 생성
                         .param("password", "1234")
                 )
@@ -118,7 +120,7 @@ public class MemberControllerTests {
 
         // WHEN
         resultActions = mvc
-                .perform(post("/member/join")
+                .perform(post("/usr/member/join")
                         .with(csrf()) // CSRF 키 생성
                         .param("username", "user10" + "a".repeat(30))
                         .param("password", "1234")
@@ -133,7 +135,7 @@ public class MemberControllerTests {
 
         // WHEN
         resultActions = mvc
-                .perform(post("/member/join")
+                .perform(post("/usr/member/join")
                         .with(csrf()) // CSRF 키 생성
                         .param("username", "user10")
                         .param("password", "1234" + "a".repeat(30))
@@ -152,7 +154,7 @@ public class MemberControllerTests {
     void t004() throws Exception {
         // WHEN
         ResultActions resultActions = mvc
-                .perform(get("/member/login"))
+                .perform(get("/usr/member/login"))
                 .andDo(print());
 
         // THEN
@@ -167,7 +169,7 @@ public class MemberControllerTests {
                         <input type="password" name="password"
                         """.stripIndent().trim())))
                 .andExpect(content().string(containsString("""
-                        <input type="submit" value="로그인"
+                        id="btn-login-1"
                         """.stripIndent().trim())));
     }
 
@@ -177,7 +179,7 @@ public class MemberControllerTests {
     void t005() throws Exception {
         // WHEN
         ResultActions resultActions = mvc
-                .perform(post("/member/login")
+                .perform(post("/usr/member/login")
                         .with(csrf()) // CSRF 키 생성
                         .param("username", "user1")
                         .param("password", "1234")
@@ -206,7 +208,7 @@ public class MemberControllerTests {
     void t006() throws Exception {
         // WHEN
         ResultActions resultActions = mvc
-                .perform(get("/member/me"))
+                .perform(get("/usr/member/me"))
                 .andDo(print());
 
         // THEN
@@ -215,7 +217,7 @@ public class MemberControllerTests {
                 .andExpect(handler().methodName("showMe"))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().string(containsString("""
-                        user1님 환영합니다.
+                        0002
                         """.stripIndent().trim())));
     }
 }
