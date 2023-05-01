@@ -68,4 +68,12 @@ public class InstaMember extends BaseEntity {
         fromLikeablePeople.removeIf(e->e.equals(likeablePerson));
     }
 
+    public String getGenderDisplayName() {
+        return switch (gender) {
+            case "W" -> "여성";
+            default -> "남성";
+        };
+    }
+
+
 }
