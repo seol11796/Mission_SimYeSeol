@@ -6,10 +6,7 @@ import com.ll.gramgram.boundedContext.instaMember.entity.InstaMember;
 import com.ll.gramgram.boundedContext.likeablePerson.entity.LikeablePerson;
 import com.ll.gramgram.boundedContext.likeablePerson.service.LikeablePersonService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +16,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
-import jakarta.validation.constraints.*;
+
 @Controller
 @RequestMapping("/usr/likeablePerson")
 @RequiredArgsConstructor
 public class LikeablePersonController {
     private final Rq rq;
     private final LikeablePersonService likeablePersonService;
-
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/like")
@@ -50,17 +45,7 @@ public class LikeablePersonController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/like")
     public String like(@Valid LikeForm likeForm) {
-        RsData canLikeRsData = likeablePersonService.canLike(rq.getMember(), likeForm.getUsername(), likeForm.getAttractiveTypeCode());
-
-        if (canLikeRsData.isFail()) return rq.historyBack(canLikeRsData);
-
-        RsData rsData;
-
-        if (canLikeRsData.getResultCode().equals("S-2")) {
-            rsData = likeablePersonService.modifyAttractive(rq.getMember(), likeForm.getUsername(), likeForm.getAttractiveTypeCode());
-        } else {
-            rsData = likeablePersonService.like(rq.getMember(), likeForm.getUsername(), likeForm.getAttractiveTypeCode());
-        }
+        RsData<LikeablePerson> rsData = likeablePersonService.like(rq.getMember(), likeForm.getUsername(), likeForm.getAttractiveTypeCode());
 
         if (rsData.isFail()) {
             return rq.historyBack(rsData);
@@ -68,7 +53,6 @@ public class LikeablePersonController {
 
         return rq.redirectWithMsg("/usr/likeablePerson/list", rsData);
     }
-
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/list")
@@ -88,23 +72,18 @@ public class LikeablePersonController {
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
     public String cancel(@PathVariable Long id) {
-
         LikeablePerson likeablePerson = likeablePersonService.findById(id).orElse(null);
 
         RsData canDeleteRsData = likeablePersonService.canCancel(rq.getMember(), likeablePerson);
 
         if (canDeleteRsData.isFail()) return rq.historyBack(canDeleteRsData);
 
-
         RsData deleteRsData = likeablePersonService.cancel(likeablePerson);
 
         if (deleteRsData.isFail()) return rq.historyBack(deleteRsData);
 
-
         return rq.redirectWithMsg("/usr/likeablePerson/list", deleteRsData);
     }
-
-
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/modify/{id}")
@@ -140,5 +119,4 @@ public class LikeablePersonController {
 
         return rq.redirectWithMsg("/usr/likeablePerson/list", rsData);
     }
-
 }
