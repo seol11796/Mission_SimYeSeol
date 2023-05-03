@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -70,6 +71,14 @@ public class LikeablePersonService {
 
     @Transactional
     public RsData cancel(LikeablePerson likeablePerson) {
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime createdAt = likeablePerson.getCreatedAt();
+
+        if(now.isBefore(createdAt.plusHours(3))){
+            return RsData.of("F-1", "호감취소는 생성 후 3시간 이후에 가능합니다. ");
+        }
+
         publisher.publishEvent(new EventBeforeCancelLike(this, likeablePerson));
 
         // 너가 생성한 좋아요가 사라졌어.
@@ -150,6 +159,13 @@ public class LikeablePersonService {
             return RsData.of("F-7", "호감표시를 하지 않았습니다.");
         }
 
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime createdAt = fromLikeablePerson.getCreatedAt();
+
+        if(now.isBefore(createdAt.plusHours(3))){
+            return RsData.of("F-2", "호감사유변경은 생성 후 3시간 이후에만 가능합니다");
+        }
+
         String oldAttractiveTypeDisplayName = fromLikeablePerson.getAttractiveTypeDisplayName();
 
         modifyAttractionTypeCode(fromLikeablePerson, attractiveTypeCode);
@@ -168,6 +184,14 @@ public class LikeablePersonService {
         LikeablePerson likeablePerson = findById(id).orElseThrow();
         RsData canModifyRsData = canModifyLike(actor, likeablePerson);
 
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime createdAt = likeablePerson.getCreatedAt();
+
+        if(now.isBefore(createdAt.plusHours(3))){
+            return RsData.of("F-2", "호감사유변경은 생성 후 3시간 이후에만 가능합니다");
+        }
+
+
         if (canModifyRsData.isFail()) {
             return canModifyRsData;
         }
@@ -180,6 +204,8 @@ public class LikeablePersonService {
     private void modifyAttractionTypeCode(LikeablePerson likeablePerson, int attractiveTypeCode) {
         int oldAttractiveTypeCode = likeablePerson.getAttractiveTypeCode();
         RsData rsData = likeablePerson.updateAttractionTypeCode(attractiveTypeCode);
+
+
 
         if (rsData.isSuccess()) {
             publisher.publishEvent(new EventAfterModifyAttractiveType(this, likeablePerson, oldAttractiveTypeCode, attractiveTypeCode));

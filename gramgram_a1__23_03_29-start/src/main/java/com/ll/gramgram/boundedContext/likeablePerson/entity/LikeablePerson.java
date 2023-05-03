@@ -9,6 +9,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -27,6 +31,14 @@ public class LikeablePerson extends BaseEntity {
     private String toInstaMemberUsername; // 혹시 몰라서 기록
 
     private int attractiveTypeCode; // 매력포인트(1=외모, 2=성격, 3=능력)
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
+
 
     public RsData updateAttractionTypeCode(int attractiveTypeCode) {
         if (this.attractiveTypeCode == attractiveTypeCode) {
