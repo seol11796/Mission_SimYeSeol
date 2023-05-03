@@ -1,10 +1,10 @@
 # 할 일
-- [ ] 호감 표시&호감 사유 변경 후, 개별 호감표시건에 대해새 3시간 동안은 사유변경을 할 수 없도록 작업
-  - [ ] LikeablePerson 엔티티 클래스에 created_at필드와 updated_dt필드 추가
-  - [ ] cancel 함수 내에서 created_at필드와 updated_at필드가 현재시간에서 3시간 이내인지 혹인 
-    - [ ] 조건 불만족 시 작업 수행하지 않도록 제어 
-  - [ ] modify 함수 내에서 created_at필드와 updated_at필드가 현재시간에서 3시간 이내인지 혹인
-    - [ ] 조건 불만족 시 작업 수행하지 않도록 제어
+- [x] 호감 표시 &호감 사유 변경 후, 개별 호감표시건에 대해새 3시간 동안은 사유변경을 할 수 없도록 작업
+  - [x] LikeablePerson 엔티티 클래스에 created_at필드와 updated_dt필드 추가
+  - [x] cancel 함수 내에서 created_at필드와 updated_at필드가 현재시간에서 3시간 이내인지 혹인 
+    - [x] 조건 불만족 시 작업 수행하지 않도록 제어 
+  - [x] modify 함수 내에서 created_at필드와 updated_at필드가 현재시간에서 3시간 이내인지 혹인
+    - [x] 조건 불만족 시 작업 수행하지 않도록 제어
 # 접근 방법
 
 ✍ 할 일 리스트를 체크하면 진행
