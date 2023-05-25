@@ -21,7 +21,9 @@ import java.util.List;
 @RequestMapping("/usr/likeablePerson")
 @RequiredArgsConstructor
 public class LikeablePersonController {
+
     private final Rq rq;
+
     private final LikeablePersonService likeablePersonService;
 
     @PreAuthorize("isAuthenticated()")

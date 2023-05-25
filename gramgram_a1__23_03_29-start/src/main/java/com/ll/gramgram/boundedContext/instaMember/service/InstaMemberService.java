@@ -88,6 +88,7 @@ public class InstaMemberService {
     }
 
     private void saveSnapshot(InstaMemberSnapshot snapshot) {
+
         instaMemberSnapshotRepository.save(snapshot);
     }
 
@@ -140,4 +141,5 @@ public class InstaMemberService {
                     saveSnapshot(snapshot);
                 });
     }
+
 }
